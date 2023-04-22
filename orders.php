@@ -1,18 +1,16 @@
 <?php
 
-include 'components/connect.php';
+include 'config.php';
 
 session_start();
 
-if(isset($_SESSION['user_id'])){
-   $user_id = $_SESSION['user_id'];
-}else{
-   $user_id = '';
-   header('location:home.php');
-};
+$user_id = $_SESSION['user_id'];
+
+if(!isset($user_id)){
+   header('location:login.php');
+}
 
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,57 +21,49 @@ if(isset($_SESSION['user_id'])){
    <title>orders</title>
 
    <!-- font awesome cdn link  -->
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
    <!-- custom css file link  -->
-   <link rel="stylesheet" href="css/style.css">
+   <link rel="stylesheet" href="home.css">
 
 </head>
 <body>
    
-<!-- header section starts  -->
-<?php include 'components/user_header.php'; ?>
-<!-- header section ends -->
+<?php include 'home_header.php'; ?>
 
 <div class="heading">
-   <h3>orders</h3>
-   <p><a href="html.php">home</a> <span> / orders</span></p>
+   <h3>your orders</h3>
+   <p> <a href="home.php">home</a> / orders </p>
 </div>
 
-<section class="orders">
+<section class="placed-orders">
 
-   <h1 class="title">your orders</h1>
+   <h1 class="title">placed orders</h1>
 
    <div class="box-container">
 
-   <?php
-      if($user_id == ''){
-         echo '<p class="empty">please login to see your orders</p>';
-      }else{
-         $select_orders = $conn->prepare("SELECT * FROM `orders` WHERE user_id = ?");
-         $select_orders->execute([$user_id]);
-         if($select_orders->rowCount() > 0){
-            while($fetch_orders = $select_orders->fetch(PDO::FETCH_ASSOC)){
-   ?>
-   <div class="box">
-      <p>Placed on : <span><?= $fetch_orders['placed_on']; ?></span></p>
-      <p>Name : <span><?= $fetch_orders['name']; ?></span></p>
-      <p>Email : <span><?= $fetch_orders['email']; ?></span></p>
-      <p>Number : <span><?= $fetch_orders['number']; ?></span></p>
-      <p>Address : <span><?= $fetch_orders['address']; ?></span></p>
-      <p>Payment method : <span><?= $fetch_orders['method']; ?></span></p>
-      <p>Your orders : <span><?= $fetch_orders['total_products']; ?></span></p>
-      <p>Total price : <span>Rs<?= $fetch_orders['total_price']; ?>/-</span></p>
-      <p> Payment status : <span style="color:<?php if($fetch_orders['payment_status'] == 'pending'){ echo 'red'; }else{ echo 'green'; }; ?>"><?= $fetch_orders['payment_status']; ?></span> </p>
-   </div>
-   <?php
-      }
+      <?php
+         $order_query = mysqli_query($conn, "SELECT * FROM `orders` WHERE user_id = '$user_id'") or die('query failed');
+         if(mysqli_num_rows($order_query) > 0){
+            while($fetch_orders = mysqli_fetch_assoc($order_query)){
+      ?>
+      <div class="box">
+         <p> placed on : <span><?php echo $fetch_orders['placed_on']; ?></span> </p>
+         <p> name : <span><?php echo $fetch_orders['name']; ?></span> </p>
+         <p> number : <span><?php echo $fetch_orders['number']; ?></span> </p>
+         <p> email : <span><?php echo $fetch_orders['email']; ?></span> </p>
+         <p> address : <span><?php echo $fetch_orders['address']; ?></span> </p>
+         <p> payment method : <span><?php echo $fetch_orders['method']; ?></span> </p>
+         <p> your orders : <span><?php echo $fetch_orders['total_products']; ?></span> </p>
+         <p> total price : <span>Rs<?php echo $fetch_orders['total_price']; ?>/-</span> </p>
+         <p> payment status : <span style="color:<?php if($fetch_orders['payment_status'] == 'pending'){ echo 'red'; }else{ echo 'green'; } ?>;"><?php echo $fetch_orders['payment_status']; ?></span> </p>
+         </div>
+      <?php
+       }
       }else{
          echo '<p class="empty">no orders placed yet!</p>';
       }
-      }
-   ?>
-
+      ?>
    </div>
 
 </section>
@@ -86,18 +76,45 @@ if(isset($_SESSION['user_id'])){
 
 
 
-
-<!-- footer section starts  -->
-<?php include 'components/footer.php'; ?>
-<!-- footer section ends -->
+<section class="footer">
 
 
 
+<div class="box-container">
 
-
+<div class="box">
+    <h3>Quick link</h3>
+    <a href="home.php"><i class="fas fa-angle-right"></i>Home</a>
+    <a href="about.php"><i class="fas fa-angle-right"></i>About</a>
+ 
+    <a href="shop.php"><i class="fas fa-angle-right"></i>Book</a>
+</div>
+<div class="box">
+    <h3>Extra link</h3>
+    <a href="#"><i class="fas fa-angle-right"></i>Ask Question</a>
+    <a href="#"><i class="fas fa-angle-right"></i>About Us</a>
+    <a href="#"><i class="fas fa-angle-right"></i>privacy policy</a>
+    <a href="#"><i class="fas fa-angle-right"></i>Terms and conditions</a>
+</div>
+<div class="box">
+    <h3>Contact Info</h3>
+    <a href="#"><i class="fas fa-phone"></i>+91-90199442</a>
+    <a href="#"><i class="fas fa-phone"></i>+91-59356694</a>
+    <a href="#"><i class="fas fa-envelope"></i>chapterone @gmail.com</a>
+    <a href="#"><i class="fas fa-map"></i>Bangalore,India-560064</a>
+</div>
+<div class="box">
+    <h3>Follow us</h3>
+    <a href="#"><i class="fab fa-facebook-f"></i>Facebook</a>
+    <a href="#"><i class="fab fa-instagram"></i>instagram</a>
+    <a href="#"><i class="fab fa-twitter"></i>Twitter</a>
+    <a href="#"><i class="fab fa-linkedin"></i>Linkedin</a>
+</div>
+</div>
+</section>
 
 <!-- custom js file link  -->
-<script src="js/script.js"></script>
+<script src="admin.js"></script>
 
 </body>
 </html>

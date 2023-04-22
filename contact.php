@@ -1,38 +1,29 @@
 <?php
 
-include 'components/connect.php';
+include 'config.php';
 
 session_start();
 
-if(isset($_SESSION['user_id'])){
-   $user_id = $_SESSION['user_id'];
-}else{
-   $user_id = '';
-};
+$user_id = $_SESSION['user_id'];
+
+if(!isset($user_id)){
+   header('location:login.php');
+}
 
 if(isset($_POST['send'])){
 
-   $name = $_POST['name'];
-   $name = filter_var($name, FILTER_SANITIZE_STRING);
-   $email = $_POST['email'];
-   $email = filter_var($email, FILTER_SANITIZE_STRING);
+   $name = mysqli_real_escape_string($conn, $_POST['name']);
+   $email = mysqli_real_escape_string($conn, $_POST['email']);
    $number = $_POST['number'];
-   $number = filter_var($number, FILTER_SANITIZE_STRING);
-   $msg = $_POST['msg'];
-   $msg = filter_var($msg, FILTER_SANITIZE_STRING);
+   $msg = mysqli_real_escape_string($conn, $_POST['message']);
 
-   $select_message = $conn->prepare("SELECT * FROM `messages` WHERE name = ? AND email = ? AND number = ? AND message = ?");
-   $select_message->execute([$name, $email, $number, $msg]);
+   $select_message = mysqli_query($conn, "SELECT * FROM `message` WHERE name = '$name' AND email = '$email' AND number = '$number' AND message = '$msg'") or die('query failed');
 
-   if($select_message->rowCount() > 0){
-      $message[] = 'already sent message!';
+   if(mysqli_num_rows($select_message) > 0){
+      $message[] = 'message sent already!';
    }else{
-
-      $insert_message = $conn->prepare("INSERT INTO `messages`(user_id, name, email, number, message) VALUES(?,?,?,?,?)");
-      $insert_message->execute([$user_id, $name, $email, $number, $msg]);
-
-      $message[] = 'sent message successfully!';
-
+      mysqli_query($conn, "INSERT INTO `message`(user_id, name, email, number, message) VALUES('$user_id', '$name', '$email', '$number', '$msg')") or die('query failed');
+      $message[] = 'message sent successfully!';
    }
 
 }
@@ -48,70 +39,81 @@ if(isset($_POST['send'])){
    <title>contact</title>
 
    <!-- font awesome cdn link  -->
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
    <!-- custom css file link  -->
-   <link rel="stylesheet" href="css/style.css">
+   <link rel="stylesheet" href="home.css">
 
 </head>
 <body>
    
-<!-- header section starts  -->
-<?php include 'components/user_header.php'; ?>
-<!-- header section ends -->
+<?php include 'home_header.php'; ?>
 
 <div class="heading">
    <h3>contact us</h3>
-   <p><a href="home.php">home</a> <span> / contact</span></p>
+   
+   <p> <a href="home.php">home</a> / contact </p>
 </div>
-
-<!-- contact section starts  -->
 
 <section class="contact">
 
-   <div class="row">
-
-      <div class="image">
-         <img src="images/contact-img.svg" alt="">
-      </div>
-
-      <form action="" method="post">
-         <h3>tell us something!</h3>
-         <input type="text" name="name" maxlength="50" class="box" placeholder="enter your name" required>
-         <input type="number" name="number" min="0" max="9999999999" class="box" placeholder="enter your number" required maxlength="10">
-         <input type="email" name="email" maxlength="50" class="box" placeholder="enter your email" required>
-         <textarea name="msg" class="box" required placeholder="enter your message" maxlength="500" cols="30" rows="10"></textarea>
-         <input type="submit" value="send message" name="send" class="btn">
-      </form>
-
-   </div>
+   <form action="" method="post">
+      <h3>Request a book</h3>
+      <input type="text" name="name" required placeholder="enter your name" class="box">
+      <input type="email" name="email" required placeholder="enter your email" class="box">
+      <input type="number" name="number" required placeholder="enter your number" class="box">
+      <textarea name="message" class="box" placeholder="enter your message" id="" cols="30" rows="10"></textarea>
+      <input type="submit" value="send message" name="send" class="btn">
+   </form>
 
 </section>
 
-<!-- contact section ends -->
 
 
 
 
 
+<section class="footer">
 
 
 
+<div class="box-container">
 
-
-<!-- footer section starts  -->
-<?php include 'components/footer.php'; ?>
-<!-- footer section ends -->
-
-
-
-
-
+<div class="box">
+    <h3>Quick link</h3>
+    <a href="home.php"><i class="fas fa-angle-right"></i>Home</a>
+    <a href="about.php"><i class="fas fa-angle-right"></i>About</a>
+ 
+    <a href="shop.php"><i class="fas fa-angle-right"></i>Book</a>
+</div>
+<div class="box">
+    <h3>Extra link</h3>
+    <a href="#"><i class="fas fa-angle-right"></i>Ask Question</a>
+    <a href="#"><i class="fas fa-angle-right"></i>About Us</a>
+    <a href="#"><i class="fas fa-angle-right"></i>privacy policy</a>
+    <a href="#"><i class="fas fa-angle-right"></i>Terms and conditions</a>
+</div>
+<div class="box">
+    <h3>Contact Info</h3>
+    <a href="#"><i class="fas fa-phone"></i>+91-90199442</a>
+    <a href="#"><i class="fas fa-phone"></i>+91-59356694</a>
+    <a href="#"><i class="fas fa-envelope"></i>chapterone @gmail.com</a>
+    <a href="#"><i class="fas fa-map"></i>Bangalore,India-560064</a>
+</div>
+<div class="box">
+    <h3>Follow us</h3>
+    <a href="#"><i class="fab fa-facebook-f"></i>Facebook</a>
+    <a href="#"><i class="fab fa-instagram"></i>instagram</a>
+    <a href="#"><i class="fab fa-twitter"></i>Twitter</a>
+    <a href="#"><i class="fab fa-linkedin"></i>Linkedin</a>
+</div>
+</div>
+</section>
 
 
 
 <!-- custom js file link  -->
-<script src="js/script.js"></script>
+<script src="admin.js"></script>
 
 </body>
 </html>
